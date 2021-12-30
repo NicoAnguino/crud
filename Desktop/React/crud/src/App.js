@@ -9,7 +9,8 @@ import shortid from "shortid";
 function App() {
   const [tarea, setTarea] = useState('')//ESTADO QUE ALMACENA EL NOMBRE DE LA TAREA NUEVA
   const [tareas, setTareas] = useState([])
-
+  const [modoEditar, setModoEditar] = useState(false)
+  const [id, setId] = useState('')
 
 const agregarTarea = (e) => {
   e.preventDefault();
@@ -28,9 +29,32 @@ const agregarTarea = (e) => {
   setTarea('')
 }
 
+const guardarEditarTarea = (e) => {
+  e.preventDefault();
+  if(isEmpty(tarea)){
+    console.log("Tarea vacía.");
+    return
+  }
+
+  const tareasEditada = tareas.map(item => item.id === id ? { id, titulo: tarea} : item)
+  setTareas(tareasEditada)
+  
+  setModoEditar(false)
+  setTarea('')
+  setId("")
+}
+
+
+
 const eliminarTarea = (id) => {
   const tareasFiltradas = tareas.filter(tarea => tarea.id !== id)
   setTareas(tareasFiltradas)
+}
+
+const editarTarea = (laTarea) => {
+  setTarea(laTarea.titulo)
+  setModoEditar(true)
+  setId(laTarea.id)
 }
 
   return (
@@ -60,6 +84,7 @@ const eliminarTarea = (id) => {
                 </button>    
                 <button 
                   className="btn btn-primary btn-sm float-right"
+                  onClick={() => editarTarea(tarea)}
                   >
                     Editar
                 </button>               
@@ -72,8 +97,10 @@ const eliminarTarea = (id) => {
 
         </div>
         <div className="col-4">
-            <h4 className="text-center">Formulario</h4>
-            <form onSubmit={agregarTarea}>
+            <h4 className="text-center">
+              { modoEditar ? "Modificar Tarea" : "Agregar Tarea"}
+            </h4>
+            <form onSubmit={ modoEditar ? guardarEditarTarea : agregarTarea}>
               <input 
                 type="text" 
                 className="form-control mb-2" 
@@ -82,9 +109,10 @@ const eliminarTarea = (id) => {
                 value={tarea}
               />
               <button 
-                className="btn btn-dark btn-block"
+                className= { modoEditar ? "btn btn-warning btn-block" : "btn btn-dark btn-block"}
                 type="submit"
-                >Agregar
+                >
+                  {modoEditar ? "Guardar" : "Agregar"}
                 </button>
             </form>
         </div>
