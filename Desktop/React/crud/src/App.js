@@ -11,12 +11,25 @@ function App() {
   const [tareas, setTareas] = useState([])
   const [modoEditar, setModoEditar] = useState(false)
   const [id, setId] = useState('')
+  const [error, setError] = useState(null)
+
+  const validarFomulario = () => {
+    let esValido = true;
+    setError(null);
+
+    if(isEmpty(tarea)){  
+      setError("Debes ingresar una tarea.")
+      esValido = false;
+    }
+
+    return esValido;
+  }
 
 const agregarTarea = (e) => {
   e.preventDefault();
-  if(isEmpty(tarea)){
-    console.log("Tarea vacía.");
-    return
+
+  if(!validarFomulario()){
+      return
   }
 
   const nuevaTarea = {
@@ -31,8 +44,8 @@ const agregarTarea = (e) => {
 
 const guardarEditarTarea = (e) => {
   e.preventDefault();
-  if(isEmpty(tarea)){
-    console.log("Tarea vacía.");
+
+  if(!validarFomulario()){
     return
   }
 
@@ -48,10 +61,12 @@ const guardarEditarTarea = (e) => {
 
 const eliminarTarea = (id) => {
   const tareasFiltradas = tareas.filter(tarea => tarea.id !== id)
+  setError(null);
   setTareas(tareasFiltradas)
 }
 
 const editarTarea = (laTarea) => {
+  setError(null);
   setTarea(laTarea.titulo)
   setModoEditar(true)
   setId(laTarea.id)
@@ -69,7 +84,10 @@ const editarTarea = (laTarea) => {
            {   
 
            size(tareas) == 0  ? (
-              <h6 className="text-center">Aún no hay tareas programadas</h6>
+
+              <ul>
+                <li className="list-group-item">Aún no hay tareas programadas.</li>
+              </ul>
            ) : (
             <ul className="list-group">
             {
@@ -101,6 +119,9 @@ const editarTarea = (laTarea) => {
               { modoEditar ? "Modificar Tarea" : "Agregar Tarea"}
             </h4>
             <form onSubmit={ modoEditar ? guardarEditarTarea : agregarTarea}>
+            {
+                error && <span className="text-danger mb-2">{error}</span>
+              }
               <input 
                 type="text" 
                 className="form-control mb-2" 
@@ -108,6 +129,7 @@ const editarTarea = (laTarea) => {
                 onChange={(text) => setTarea(text.target.value)}
                 value={tarea}
               />
+            
               <button 
                 className= { modoEditar ? "btn btn-warning btn-block" : "btn btn-dark btn-block"}
                 type="submit"
