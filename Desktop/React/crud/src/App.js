@@ -1,7 +1,8 @@
 
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import { isEmpty, size } from "lodash";
-import shortid from "shortid";
+//import shortid from "shortid";
+import { actualizarDocumento, eliminarDocumento, insertarDocumento, leerColeccion } from "./acciones";
 
 //https://yarnpkg.com/?
 //npm i --save lodash
@@ -13,6 +14,17 @@ function App() {
   const [modoEditar, setModoEditar] = useState(false)
   const [id, setId] = useState('')
   const [error, setError] = useState(null)
+
+
+ useEffect(() => {
+   (async () => {
+      const resultado = await leerColeccion("tareas")
+      if(resultado.statusResponse){
+        setTareas(resultado.data)
+      }    
+   })()
+ }, [])
+
 
   const validarFomulario = () => {
     let esValido = true;
@@ -26,27 +38,40 @@ function App() {
     return esValido;
   }
 
-const agregarTarea = (e) => {
+const agregarTarea = async(e) => {
   e.preventDefault();
 
   if(!validarFomulario()){
       return
   }
 
-  const nuevaTarea = {
-     id:shortid.generate(),
-     titulo: tarea
-  }
+const resultado = await insertarDocumento("tareas", {titulo: tarea})
+if(!resultado.statusResponse){
+  setError(resultado.error)
+  return
+}
 
-  setTareas([...tareas, nuevaTarea])
-  
+  //const nuevaTarea = {
+    // id:shortid.generate(),
+     //titulo: tarea
+  //}
+
+  //setTareas([...tareas, nuevaTarea])
+
+  setTareas([...tareas, {id: resultado.data.id, titulo:tarea}])
   setTarea('')
 }
 
-const guardarEditarTarea = (e) => {
+const guardarEditarTarea = async(e) => {
   e.preventDefault();
 
   if(!validarFomulario()){
+    return
+  }
+
+  const resultado = await actualizarDocumento("tareas", id, {titulo:tarea})
+  if(!resultado.statusResponse){
+    setError(resultado.error)
     return
   }
 
@@ -60,7 +85,13 @@ const guardarEditarTarea = (e) => {
 
 
 
-const eliminarTarea = (id) => {
+const eliminarTarea = async(id) => {
+const resultado = await eliminarDocumento("tareas", id)
+if(!resultado.statusResponse){
+  setError(resultado.error)
+  return
+}
+
   const tareasFiltradas = tareas.filter(tarea => tarea.id !== id)
   setError(null);
   setTareas(tareasFiltradas)
