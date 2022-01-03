@@ -3,6 +3,7 @@ import React, {useState} from "react";
 import { isEmpty, size } from "lodash";
 import shortid from "shortid";
 
+//https://yarnpkg.com/?
 //npm i --save lodash
 //npm i --save shortid
 
